@@ -1,150 +1,148 @@
-Okay, here's the updated `README.md` reflecting the final project structure, data preprocessing steps, and the refined scripts.
+````markdown
+# AuraCore: Adaptive Real-Time Audio Mastering Engine
+
+AuraCore is an AI-powered system for real-time audio mastering with adaptive learning capabilities. It analyzes incoming audio, predicts optimal mastering settings using a trained neural network, and applies them through a custom DSP chain. The engine's core innovation allows it to learn a user's preferences in real-time by fine-tuning its predictions based on manual adjustments made via a GUI.
+
+Developed as an undergraduate thesis project (ending July 31, 2025), AuraCore focuses on novel approaches to AI in audio with patent potential, targeting low-latency performance (<50ms) on consumer hardware.
+
+---
+## 🚀 Features
+
+* **Real-Time AI Processing:** Lightweight CNN feature extractor and MLP prediction model optimized for low-latency GPU inference.
+* **Full Mastering Chain:** Includes an 8-Band Parametric EQ, a dynamics Compressor, and a Lookahead Limiter, all designed for artifact-free parameter changes.
+* **Adaptive Learning:** The AI fine-tunes its predictions *live* based on user tweaks in the GUI, personalizing the mastering style.
+* **DAW Integration:** Connects to DAWs (like FL Studio) using a virtual audio cable.
+* **Efficient Data Pipeline:** Pre-processes large datasets into resumable, memory-safe chunks for robust training and evaluation.
+
+---
+## 📁 Project Structure
+
+```text
+AuraCore/
+├── data/
+│   ├── train/              # Source audio for training (.mp3, .wav, etc.)
+│   ├── test/               # Source audio for testing
+│   ├── train_chunks_temp/  # Pre-processed training chunks (.pt files)
+│   └── test_chunks_temp/   # Pre-processed test chunks (.pt files)
+├── models/
+│   ├── feature_extractor.pth # Saved model weights
+│   └── prediction_model.pth
+├── src/
+│   ├── ai/                 # AI model definitions
+│   │   ├── feature_extractor.py
+│   │   └── prediction_model.py
+│   └── core/               # DSP algorithms
+│       └── dsp.py
+├── .gitignore              # Files ignored by Git
+├── auracore_gui.py         # The main GUI application ✨
+├── create_baseline_models.py # Creates initial models (run once)
+├── evaluator.py            # Evaluates model performance 📊
+├── preprocess_data.py      # Pre-processes audio data (run once) ⚙️
+├── README.md               # This file
+├── requirements.txt        # Python dependencies
+└── trainer.py              # Trains the AI models (optional after baseline) 🧠
+````
 
 -----
 
-## File: `README.md` (Updated)
-
-````markdown
-# AuraCore: Adaptive Real-Time Audio Mastering Engine 🚀
-
-AuraCore is an AI-powered system for real-time audio mastering with adaptive learning capabilities. It analyzes incoming audio, predicts optimal mastering settings using a trained neural network, and applies them through a custom DSP chain. The engine's core innovation is its ability to **learn a user's preferences in real-time** by fine-tuning the AI based on manual adjustments made via a GUI.
-
-This project was developed as an undergraduate thesis with a focus on novel approaches to AI in audio, aiming for patent potential and real-time performance (<50ms latency) on consumer hardware.
-
----
-## ✨ Features
-
-* **Real-Time AI Processing:** Lightweight CNN feature extractor and MLP prediction model optimized for low-latency GPU inference.
-* **Full Mastering Chain:** Includes an 8-Band Parametric EQ, a dynamics Compressor, and a Lookahead Limiter with parameter smoothing.
-* **Adaptive Learning:** The AI fine-tunes its predictions *live* based on user tweaks via the GUI.
-* **DAW Integration:** Connects to DAWs (like FL Studio) using a virtual audio cable.
-* **Efficient Data Handling:** Robust, resumable data preprocessing pipeline for large audio datasets.
-
----
 ## 🛠️ Setup & Installation
 
 1.  **Clone Repository**
+
     ```bash
     git clone <your-repo-url>
     cd AuraCore
     ```
 
 2.  **Create Virtual Environment**
+
     ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    python -m venv aura_env
+    # On Windows:
+    .\aura_env\Scripts\activate
+    # On macOS/Linux:
+    # source aura_env/bin/activate
     ```
 
 3.  **Install Dependencies**
-    * Make sure you have PyTorch installed with CUDA support if you have an NVIDIA GPU. See [PyTorch installation instructions](https://pytorch.org/).
-    * Install project requirements:
-        ```bash
-        pip install -r requirements.txt
-        ```
 
-4.  **Install Virtual Audio Cable**
-    * Download and install VB-CABLE ([https://vb-audio.com/Cable/](https://vb-audio.com/Cable/)). **Run the setup as administrator** and **reboot** your computer.
+    ```bash
+    pip install -r requirements.txt
+    ```
 
----
-## 🏃 Running AuraCore
+    *(This includes PyTorch, torchaudio, sounddevice, tqdm, etc.)*
 
-Follow these steps in order:
+4.  **Install Virtual Audio Cable:** Download and install **VB-CABLE** ([https://vb-audio.com/Cable/](https://vb-audio.com/Cable/)). Remember to run the setup **as administrator** and **reboot** your computer.
 
-### ### 1. Prepare the Dataset (`preprocess_data.py`)
+-----
 
-This script processes your raw audio files into efficient chunks for training and evaluation.
+## 🏃 How to Use AuraCore
 
-1.  **Download Dataset:** Obtain an audio dataset (e.g., [FMA Small](https://github.com/mdeff/fma)).
-2.  **Organize Files:** Create `data/train/` and `data/test/` folders. Place ~80% of your audio files (e.g., `.mp3`) in `data/train/` and ~20% in `data/test/`. *Alternatively, use `prepare_dataset.py` if you have the raw FMA structure.*
-3.  **Run Preprocessing:**
+### \#\#\# Step 1: Prepare the Dataset (`preprocess_data.py`) - Run Once
+
+This script converts your raw audio files into processed chunks, handling potential errors and making training/evaluation faster and safer.
+
+1.  **Place Data:** Put your `.mp3`, `.wav`, or `.flac` audio files into `data/train/` and `data/test/`.
+2.  **Run Pre-processing:**
     ```bash
     python preprocess_data.py
     ```
-    This will create `data/train_chunks_temp/` and `data/test_chunks_temp/` folders containing thousands of `.pt` chunk files. This script is **resumable** – run it again if it gets interrupted.
+    *This script is resumable.* If it stops, just run it again. It will create `data/train_chunks_temp/` and `data/test_chunks_temp/`.
 
-### ### 2. Create Baseline Models (`create_baseline_models.py`)
+### \#\#\# Step 2: Create Baseline Models (`create_baseline_models.py`) - Run Once
 
-This step creates the initial "neutral" AI models.
+This script saves the initial, untrained state of the AI models. This serves as our functional "neutral" baseline, effectively skipping the long initial training phase.
 
-1.  **Run:**
+```bash
+python create_baseline_models.py
+```
+
+This creates the `.pth` files in the `models/` directory.
+
+### \#\#\# Step 3: Evaluate Baseline Performance (`evaluator.py`)
+
+This script tests the baseline model on the unseen test data and calculates its performance score (MSE Loss).
+
+1.  **Run Evaluation:**
     ```bash
-    python create_baseline_models.py
+    python evaluator.py --max_samples 50000
     ```
-    This saves `feature_extractor.pth` and `prediction_model.pth` to the `models/` directory.
+    *(Adjust `--max_samples` if needed, 50k is recommended)*.
+2.  **Record Score:** Note the "Final Performance Score (Average MSE Loss)" for your paper. A low score confirms the baseline is working correctly.
 
-### ### 3. Evaluate Baseline Performance (`evaluator.py`)
-
-Test the baseline model's performance on unseen data.
-
-1.  **Run:**
-    ```bash
-    python evaluator.py --max_samples 50000 # Or adjust the number of samples
-    ```
-2.  **Record Result:** Note the **"Final Performance Score (Average MSE Loss)"**. This is crucial for your paper.
-
-### ### 4. Run the Live GUI (`auracore_gui.py`)
+### \#\#\# Step 4: Run the Live GUI (`auracore_gui.py`)
 
 This is the main application for real-time mastering and adaptive learning.
 
-1.  **Configure FL Studio:** Set FL Studio's audio output device to **`CABLE Input (VB-Audio Virtual Cable)`** (usually via FL Studio ASIO settings). 
-2.  **Configure Script Devices:** Run `python auracore_gui.py` once. It will list audio devices. Edit the `auracore_gui.py` script and set the `INPUT_DEVICE` (your virtual cable, e.g., "CABLE Output") and `OUTPUT_DEVICE` (your speakers/headphones) index numbers.
-3.  **Launch:**
+1.  **Configure Audio Devices:** Run `python auracore_gui.py` once. It will list your audio devices. Edit the `INPUT_DEVICE` (VB-CABLE Output) and `OUTPUT_DEVICE` (your speakers) variables near the top of the script with the correct index numbers.
+2.  **Setup DAW:** Configure FL Studio (or your DAW) to use **FL Studio ASIO** and set its **Output** to **CABLE Input (VB-Audio Virtual Cable)**.
+3.  **Launch AuraCore:**
     ```bash
     python auracore_gui.py
     ```
-4.  **Use:** Press play in FL Studio. The audio will be processed by AuraCore. Use the sliders in the GUI to adjust the sound. The AI learns from your tweaks! Click "Reset All to AI" to hear the AI's adapted suggestions.
+4.  **Play Audio in DAW:** Press play in FL Studio. The audio will route through AuraCore.
+5.  **Interact & Teach:** Use the sliders in the GUI to adjust the sound. The AI learns from your changes\! Click "Reset All to AI" to see how its suggestions have adapted.
 
-### ### (Optional) Train a Custom Model (`trainer.py`)
+### \#\#\# Step 5 (Optional): Further Training (`trainer.py`)
 
-If you want to train the model beyond the baseline (e.g., on a specific genre or style, though our baseline is effective), use the trainer.
+While the baseline model is functional, you can optionally run the trainer to further refine the AI on the pre-processed data. This was found to be very slow due to I/O bottlenecks in testing.
 
-1.  **Ensure Preprocessing is Done:** Make sure `data/train_chunks_temp/` exists.
-2.  **Configure Epochs (Optional):** Edit `trainer.py` to set `NUM_EPOCHS`.
-3.  **Run Training:**
-    ```bash
-    python trainer.py
-    ```
-    This script uses **checkpointing** (`models/training_checkpoint.pth`) and is **resumable**. Stop with `Ctrl+C` after an epoch completes, and run the script again to resume.
-4.  **Finalize Model:** After training, run:
-    ```bash
-    python finalize_model.py
-    ```
-    This saves the final trained models from the checkpoint.
-5.  **Re-evaluate:** Run `evaluator.py` again to get the score for your custom-trained model.
-
----
-## 📁 Project Structure
-
-````
-
-AuraCore/
-├── data/
-│   ├── train/              \# Raw training audio (e.g., .mp3)
-│   ├── test/               \# Raw test audio
-│   ├── train\_chunks\_temp/  \# Preprocessed training chunks (.pt)
-│   └── test\_chunks\_temp/   \# Preprocessed test chunks (.pt)
-├── models/               \# Saved model weights (.pth) & checkpoints
-├── src/                  \# Core source code
-│   ├── ai/               \# AI models (feature\_extractor.py, prediction\_model.py)
-│   ├── core/             \# DSP modules (dsp.py)
-│   └── ui/               \# (Contains GUI logic if refactored)
-├── .gitignore            \# Files ignored by Git
-├── auracore\_gui.py       \# Main application script with GUI
-├── create\_baseline\_models.py \# Creates initial neutral models
-├── evaluator.py          \# Evaluates model performance on test data
-├── finalize\_model.py     \# Extracts final models from training checkpoint
-├── prepare\_dataset.py    \# (Optional) Helper to split raw FMA data
-├── preprocess\_data.py    \# Processes raw audio into chunks
-├── README.md             \# This file
-├── requirements.txt      \# Python dependencies
-└── trainer.py            \# Trains the AI models
-
+```bash
+# Optional: Run if you want to train beyond the baseline
+python trainer.py
 ```
 
----
+*(Uses checkpointing, so it can be stopped and resumed)*.
+
+-----
+
 ## 💡 Key Innovations (Patent Potential)
 
-1.  **Real-time Adaptive Learning Loop:** The core method where user adjustments in the GUI during live audio playback directly trigger fine-tuning of the prediction model, personalizing the mastering process dynamically.
-2.  **Stable Baseline & Efficient Learning:** Training methodology focusing on achieving a neutral baseline, allowing the adaptive loop to effectively capture user preferences without extensive initial training.
-3.  **Low-Latency Pipeline:** Integration of GPU-accelerated AI inference and efficient CPU-based DSP designed for real-time (<50ms) operation on consumer hardware.
+1.  **Real-time Adaptive Learning Loop:** The core method where user tweaks in the GUI create live training examples, immediately fine-tuning the AI's prediction model during an active session.
+2.  **Efficient Baseline Model:** Demonstrating that even the initial model state achieves near-zero error on the baseline task (neutral processing of mastered audio).
+3.  **Artifact-Free DSP:** The custom EQ, Compressor, and Limiter handle rapid parameter changes from the AI without audible clicks or glitches.
+
+<!-- end list -->
+
+```
 ```
