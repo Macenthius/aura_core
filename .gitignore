@@ -1,12 +1,11 @@
-# Byte-compiled / optimized / DLL files
+# ===========================================================================
+# AURACORE: GIT IGNORE CONFIGURATION
+# ===========================================================================
+
+# --- Python ---
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -25,19 +24,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# PyInstaller
-# Usually these files are written by a python script from a template
-# before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
+.ipynb_checkpoints
+.pytest_cache/
 .tox/
 .nox/
 .coverage
@@ -47,109 +35,65 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
 
-# Translations
-*.mo
-*.pot
-*.po
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
+# --- Rust / Cargo ---
+# The 'target' folder contains all compiled binaries and build artifacts.
 target/
+# Cargo.lock is sometimes tracked, but for extension modules it's often ignored
+# Cargo.lock
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# --- Compiled Extensions ---
+# Compiled Rust dependencies for Python
+*.pyd
+*.so
+*.dylib
+auracore/auracore_engine.pyd
 
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-#   For a library or package, you might want to consider adding '.pyenv' to
-#   the global '.gitignore' instead of adding it to this project's '.gitignore'
-.python-version
-
-# pipenv
-# According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-# Pipfile
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# --- Environments ---
 .env
 .venv
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
-aura_env/ # <--- Your specific virtual environment
+aura_env/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# MicrosoftVisualStudio Code
+# --- IDEs & System ---
 .vscode/
-
-# JetBrains IDEs
 .idea/
-
-# macOS / Windows specific
+.spyderproject
+.ropeproject
 .DS_Store
 Thumbs.db
+*.bak
+*.log
 
-# Project-specific ignores
-# -----------------------------
-# Large data files (consider if you want to track small sample data)
+# --- Audio Data (Large Files) ---
+# We ignore the massive chunked data used for training/evaluation
 data/train_chunks_temp/
 data/test_chunks_temp/
 data/train_chunks.pt
 data/test_chunks.pt
-# If you don't want to track ANY audio data (even source mp3s):
+# Source audio (Optional: Uncomment to ignore raw audio files)
 # data/train/
 # data/test/
 
-# Trained models (usually large binaries, generated artifacts)
+# --- AI Models & Checkpoints ---
+# We keep the brain architecture but ignore the heavy binary weights
 models/*.pth
 models/*.pt
+auracore/ai/checkpoints/
+_legacy_backup/
 
-# Test output files
+# --- Audio Test Artifacts ---
 *.wav
 *.mp3
-
-# Other potentially generated files
 eq_test_output.wav
 comp_test_input.wav
 comp_test_output.wav
 limiter_test_input_clipping.wav
 limiter_test_output_limited.wav
+
+# --- Logs & Performance ---
+evaluation_results/
+build_log*.txt
+build_output.txt

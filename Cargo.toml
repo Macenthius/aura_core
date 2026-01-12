@@ -1,0 +1,39 @@
+[package]
+name = "auracore_engine"
+version = "0.1.0"
+edition = "2021"
+
+# ===========================================================================
+# AURACORE: CARGO CONFIGURATION (The Build Map)
+# ===========================================================================
+# 
+# WHAT IS THIS FILE?
+# Think of this as the "Shopping List" and "Instruction Manual" for the 
+# Rust compiler. It tells Rust:
+# 1. What libraries (Crates) we need to download.
+# 2. How to bundle our code into a file that Python can understand (.pyd).
+# ===========================================================================
+
+[lib]
+# 'cdylib' is the magic setting that tells Rust to create a dynamic library
+# that can be imported by other languages like Python.
+name = "auracore_engine"
+crate-type = ["cdylib"]
+
+[dependencies]
+# PyO3: The bridge between Rust and Python. It translates types like 'float'
+# between the two languages.
+pyo3 = { version = "0.20", features = ["extension-module"] }
+
+# CPAL: The Cross-Platform Audio Library. This handles talking to your
+# headphones and microphone.
+cpal = "0.15"
+
+# Parking Lot: Provides high-performance 'Mutexes' for safe data sharing.
+parking_lot = "0.12"
+
+# Anyhow: Makes error handling much easier to read and write.
+anyhow = "1.0"
+
+# Atomic: Special flags that can be shared between threads without a Mutex.
+atomic = "0.5"
